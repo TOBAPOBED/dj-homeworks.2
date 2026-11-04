@@ -9,9 +9,21 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        with open('phones.csv', 'r') as file:
+        with open('phones.csv', 'r', encoding='utf-8') as file:
             phones = list(csv.DictReader(file, delimiter=';'))
 
         for phone in phones:
-            # TODO: Добавьте сохранение модели
-            pass
+            # Создаём объект Phone из строки CSV
+            Phone.objects.create(
+                id=int(phone['id']),
+                name=phone['name'],
+                price=float(phone['price']),
+                image=phone['image'],
+                release_date=phone['release_date'],
+                lte_exists=phone['lte_exists'].lower() == 'true',
+            )
+            self.stdout.write(self.style.SUCCESS(
+                f'Добавлен телефон: {phone["name"]}'
+            ))
+        
+        self.stdout.write(self.style.SUCCESS('Импорт завершён!'))
