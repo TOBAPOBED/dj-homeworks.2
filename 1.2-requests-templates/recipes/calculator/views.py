@@ -28,3 +28,34 @@ DATA = {
 #     'ингредиент2': количество2,
 #   }
 # }
+
+def show_recipe(request, recipe_name):
+    # Получаем рецепт из DATA
+    recipe = DATA.get(recipe_name)
+    
+    # Если рецепт не найден — возвращаем 404
+    if recipe is None:
+        from django.http import HttpResponseNotFound
+        return HttpResponseNotFound('Рецепт не найден')
+    
+    # Получаем параметр servings из URL (?servings=4)
+    servings_str = request.GET.get('servings')
+    
+    # Если параметр есть — конвертируем в число, иначе 1 порция
+    if servings_str is not None:
+        servings = int(servings_str)
+    else:
+        servings = 1
+    
+    # Умножаем все ингредиенты на количество порций
+    recipe_with_servings = {}
+    for ingredient, amount in recipe.items():
+        recipe_with_servings[ingredient] = amount * servings
+    
+    # Формируем контекст
+    context = {
+        'recipe': recipe_with_servings
+    }
+    
+    # Возвращаем шаблон
+    return render(request, 'calculator/index.html', context)
